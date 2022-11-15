@@ -1,9 +1,11 @@
-import React from 'react'
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 const Main = () => {
-  return (
-    <div>Home Page</div>
-  )
-}
+  const userName = useSelector((state: RootState) => state.user.value.username);
 
-export default Main
+  return <div>Home Page {userName}</div>;
+};
+
+export default Main;
