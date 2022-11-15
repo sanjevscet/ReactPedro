@@ -1,18 +1,40 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  PayloadAction,
+  createAsyncThunk,
+  ActionReducerMapBuilder,
+} from '@reduxjs/toolkit';
 
-interface IValue {
-  username: string;
-}
+import axios from 'axios';
 
 interface InitialState {
-  value: IValue;
+  username: string;
+  users?: IUser[];
+  loading?: boolean;
 }
 
 const initialState: InitialState = {
-  value: {
-    username: 'Sanjeev',
-  },
+  username: 'Sanjeev',
+  loading: false,
+  users: [],
 };
+
+interface IUser {
+  id: number;
+  name: string;
+}
+
+export const fetchUserById = createAsyncThunk(
+  'user/fetchById',
+  // Declare the type your function argument here:
+  async (userId: number) => {
+    const { data } = await axios.get(
+      `https://jsonplaceholder.typicode.com/users/${userId}`
+    );
+    // Inferred return type: Promise<MyData>
+    return [data] as IUser[];
+  }
+);
 
 // const initialState = { value: { username: 'Sanjeev' } };
 
@@ -23,21 +45,32 @@ const UserSlice = createSlice({
     login: {
       reducer(
         state: InitialState,
-        acion: PayloadAction<IValue, string, { name?: string }>
+        acion: PayloadAction<InitialState, string, { name?: string }>
       ) {
-        state.value.username = acion.meta?.name
+        state.username = acion.meta?.name
           ? acion.meta?.name
           : acion.payload.username;
       },
-      prepare(payload: IValue, name?: string) {
+      prepare(payload: InitialState, name?: string) {
         const ucName = payload.username.toUpperCase();
         return { payload, meta: { name: ucName } };
       },
     },
 
     logout: (state: InitialState) => {
-      state.value = initialState.value;
+      state.username = initialState.username;
     },
+  },
+  extraReducers: (builder: ActionReducerMapBuilder<InitialState>) => {
+    builder.addCase(fetchUserById.pending, (state) => {
+      state.loading = true;
+      state.users = [];
+    });
+
+    builder.addCase(fetchUserById.fulfilled, (state, payload) => {
+      state.loading = false;
+      state.users = payload.payload;
+    });
   },
 });
 

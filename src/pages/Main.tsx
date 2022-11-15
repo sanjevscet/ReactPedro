@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 
 const Main = () => {
-  const userName = useSelector((state: RootState) => state.user.value.username);
+  const userName = useSelector((state: RootState) => state.user.username);
 
   return <div>Home Page {userName}</div>;
 };
